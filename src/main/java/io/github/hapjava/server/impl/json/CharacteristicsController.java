@@ -59,9 +59,10 @@ public class CharacteristicsController {
       }
     }
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-      Json.createWriter(baos)
-          .write(
+      JsonWriter writer = Json.createWriter(baos);
+      writer.write(
               Json.createObjectBuilder().add("characteristics", characteristics.build()).build());
+      writer.close();
       return new HapJsonResponse(baos.toByteArray());
     }
   }

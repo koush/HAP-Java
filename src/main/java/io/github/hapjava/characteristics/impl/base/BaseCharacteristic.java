@@ -83,7 +83,7 @@ public abstract class BaseCharacteristic<T> implements Characteristic, Eventable
    * @return a future that will complete with the JSON builder for the object.
    */
   protected CompletableFuture<JsonObjectBuilder> makeBuilder(int instanceId) {
-    CompletableFuture<T> futureValue = getValue();
+    CompletableFuture<T> futureValue = getValueListing();
 
     if (futureValue == null) {
       futureValue = CompletableFuture.completedFuture(getDefault());
@@ -175,6 +175,10 @@ public abstract class BaseCharacteristic<T> implements Characteristic, Eventable
    * @return a future that will complete with the current value.
    */
   protected abstract CompletableFuture<T> getValue();
+
+  protected CompletableFuture<T> getValueListing() {
+    return getValue();
+  }
 
   /**
    * Supplies a default value for the characteristic to send to connected clients when the real

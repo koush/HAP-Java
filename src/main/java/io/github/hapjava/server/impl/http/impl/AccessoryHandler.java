@@ -11,6 +11,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +51,18 @@ class AccessoryHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
   @Override
   public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) throws Exception {
     try {
-      HttpResponse response = connection.handleRequest(new FullRequestHttpRequestImpl(req));
+      FullRequestHttpRequestImpl httpRequestImpl = new FullRequestHttpRequestImpl(req);
+      CompletableFuture<HttpResponse> future = connection.handleRequestAsync(httpRequestImpl);
+      if (future != null) {
+        future.thenAccept(response -> sendResponse(response, ctx))
+                .exceptionally(e -> {
+                  sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, "Error: "+e.getMessage(), ctx);
+                  return null;
+                });
+        return;
+      }
+      HttpResponse response = connection.handleRequest(httpRequestImpl);
+
       if (response.doUpgrade()) {
         ChannelPipeline pipeline = ctx.channel().pipeline();
         pipeline.addBefore(

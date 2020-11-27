@@ -1,7 +1,10 @@
 package io.github.hapjava.server.impl;
 
 import io.github.hapjava.accessories.Bridge;
+import io.github.hapjava.characteristics.impl.bridge.BridgeVersionCharacteristic;
 import io.github.hapjava.services.Service;
+import io.github.hapjava.services.impl.HAPProtocolInformationService;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
@@ -57,7 +60,8 @@ public class HomekitBridge implements Bridge {
 
   @Override
   public Collection<Service> getServices() {
-    return Collections.emptyList();
+    return Collections.singleton(new HAPProtocolInformationService(
+            new BridgeVersionCharacteristic(() -> CompletableFuture.completedFuture("1.1.0"))));
   }
 
   @Override
